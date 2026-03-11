@@ -1,0 +1,92 @@
+---
+import logoBlanc from "../assets/icon/logo-blanc.svg";
+
+const navItems = [
+    { label: "Accueil", href: "/" },
+    { label: "Programmation", href: "/programmation" },
+    { label: "Artistes", href: "/artistes" },
+    { label: "Scènes", href: "/scenes" },
+    { label: "Billetterie", href: "/billetterie" },
+    { label: "Infos Pratiques", href: "/infos-pratiques" },
+    { label: "Contact", href: "/contact" },
+];
+---
+
+<header
+    class="fixed top-0 left-0 right-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/50"
+>
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 md:h-20">
+            <a href="/" class="flex items-center group">
+                <img
+                    src={logoBlanc.src}
+                    alt="Chorus Symphonia"
+                    class="h-14 md:h-16 w-auto"
+                />
+            </a>
+
+            <ul class="hidden md:flex items-center gap-8">
+                {
+                    navItems.map((item) => (
+                        <li>
+                            <a
+                                href={item.href}
+                                class="text-zinc-400 hover:text-purple-400 transition-colors text-sm font-medium uppercase tracking-wider"
+                            >
+                                {item.label}
+                            </a>
+                        </li>
+                    ))
+                }
+            </ul>
+
+            <button
+                id="mobile-menu-btn"
+                class="md:hidden p-2 text-zinc-400 hover:text-purple-400 transition-colors"
+                aria-label="Menu"
+            >
+                <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div
+        id="mobile-menu"
+        class="md:hidden hidden bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800"
+    >
+        <ul class="px-4 py-4 space-y-2">
+            {
+                navItems.map((item) => (
+                    <li>
+                        <a
+                            href={item.href}
+                            class="block py-3 px-4 text-zinc-400 hover:text-purple-400 hover:bg-zinc-800/50 rounded-lg transition-all text-sm font-medium uppercase tracking-wider"
+                        >
+                            {item.label}
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+    </div>
+</header>
+
+<script>
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    mobileMenuBtn?.addEventListener("click", () => {
+        mobileMenu?.classList.toggle("hidden");
+    });
+</script>

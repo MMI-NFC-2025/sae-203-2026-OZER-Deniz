@@ -1,0 +1,131 @@
+---
+const concerts = [
+    {
+        date: "28 Aout",
+        time: "20h30",
+        title: "Concert d'ouverture",
+        artist: "Orchestre National de Lyon",
+        conductor: "Dir. Alexandre Bloch",
+        program: "Beethoven - Symphonie n9",
+        image: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+        date: "29 Aout",
+        time: "21h00",
+        title: "Recital Piano",
+        artist: "Khatia Buniatishvili",
+        conductor: "",
+        program: "Chopin, Liszt, Rachmaninov",
+        image: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+        date: "30 Aout",
+        time: "20h30",
+        title: "Musique de chambre",
+        artist: "Quatuor Ebene",
+        conductor: "",
+        program: "Debussy, Ravel, Faure",
+        image: "https://images.unsplash.com/photo-1519683384663-a080d27af4e0?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+        date: "31 Aout",
+        time: "21h00",
+        title: "Concert de cloture",
+        artist: "Orchestre de Paris",
+        conductor: "Dir. Klaus Makela",
+        program: "Mahler - Symphonie n2",
+        image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80",
+    },
+];
+---
+
+<section class="py-24 bg-zinc-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <span
+                class="inline-block text-purple-400 font-medium uppercase tracking-wider text-sm mb-4"
+                >Programmation 2026</span
+            >
+            <h2
+                class="font-serif text-4xl sm:text-5xl font-bold text-zinc-100 mb-6"
+            >
+                Temps forts du festival
+            </h2>
+            <p class="text-zinc-400 max-w-2xl mx-auto">
+                Decouvrez les moments inoubliables qui vous attendent lors de
+                cette edition exceptionnelle.
+            </p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {
+                concerts.map((concert) => (
+                    <article class="group bg-zinc-800/50 rounded-2xl overflow-hidden hover:bg-zinc-800 transition-all duration-300">
+                        <div class="aspect-[4/3] overflow-hidden">
+                            <img
+                                src={concert.image}
+                                alt={concert.title}
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 text-purple-400 text-sm font-medium mb-3">
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                </svg>
+                                <span>{concert.date}</span>
+                                <span class="text-zinc-500">|</span>
+                                <span>{concert.time}</span>
+                            </div>
+                            <h3 class="font-serif text-xl font-semibold text-zinc-100 mb-2 group-hover:text-purple-400 transition-colors">
+                                {concert.title}
+                            </h3>
+                            <p class="text-zinc-300 font-medium mb-1">
+                                {concert.artist}
+                            </p>
+                            {concert.conductor && (
+                                <p class="text-zinc-500 text-sm mb-2">
+                                    {concert.conductor}
+                                </p>
+                            )}
+                            <p class="text-zinc-400 text-sm italic">
+                                {concert.program}
+                            </p>
+                        </div>
+                    </article>
+                ))
+            }
+        </div>
+
+        <div class="text-center mt-12">
+            <a
+                href="/programmation"
+                class="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-medium transition-colors"
+            >
+                Voir toute la programmation
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>

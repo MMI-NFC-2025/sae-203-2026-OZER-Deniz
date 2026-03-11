@@ -1,1 +1,184 @@
 @import "tailwindcss";
+
+@theme {
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+
+    --color-primary: #a855f7;
+    --color-primary-light: #c084fc;
+    --color-primary-dark: #7e22ce;
+
+    --color-background: #120717;
+    --color-surface: #1a0b24;
+    --color-surface-light: #241033;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--color-background);
+}
+
+body.bg-zinc-950,
+body.bg-stone-950 {
+    background-color: var(--color-background) !important;
+}
+
+.bg-zinc-950,
+.bg-stone-950 {
+    background-color: var(--color-background) !important;
+}
+
+.bg-zinc-900,
+.bg-stone-900 {
+    background-color: var(--color-surface) !important;
+}
+
+.bg-zinc-800,
+.bg-stone-800 {
+    background-color: var(--color-surface-light) !important;
+}
+
+.bg-zinc-700 {
+    background-color: #2f1741 !important;
+}
+
+.border-zinc-800,
+.border-stone-800 {
+    border-color: rgba(168, 85, 247, 0.16) !important;
+}
+
+.border-zinc-700,
+.border-zinc-700\/50 {
+    border-color: rgba(168, 85, 247, 0.22) !important;
+}
+
+.bg-zinc-950\/90 {
+    background-color: rgba(18, 7, 23, 0.9) !important;
+}
+
+.bg-zinc-900\/95 {
+    background-color: rgba(26, 11, 36, 0.95) !important;
+}
+
+.bg-zinc-900\/50,
+.bg-zinc-800\/50,
+.bg-stone-900\/50,
+.bg-stone-800\/50 {
+    background-color: rgba(26, 11, 36, 0.5) !important;
+}
+
+.bg-zinc-800\/80,
+.bg-stone-800\/80 {
+    background-color: rgba(36, 16, 51, 0.8) !important;
+}
+
+.bg-zinc-700\/50 {
+    background-color: rgba(47, 23, 65, 0.5) !important;
+}
+
+.bg-zinc-900\/80,
+.bg-stone-900\/80 {
+    background-color: rgba(26, 11, 36, 0.8) !important;
+}
+
+.from-zinc-900,
+.from-stone-900 {
+    --tw-gradient-from: var(--color-surface) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(26, 11, 36, 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from), var(--tw-gradient-to)) !important;
+}
+
+.from-zinc-800\/80,
+.from-stone-800\/80 {
+    --tw-gradient-from: rgba(36, 16, 51, 0.8) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(36, 16, 51, 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from), var(--tw-gradient-to)) !important;
+}
+
+.from-zinc-950\/80,
+.from-stone-950\/80 {
+    --tw-gradient-from: rgba(18, 7, 23, 0.8) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(18, 7, 23, 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from), var(--tw-gradient-to)) !important;
+}
+
+.via-zinc-950\/60,
+.via-stone-950\/60 {
+    --tw-gradient-via: rgba(18, 7, 23, 0.6) var(--tw-gradient-via-position) !important;
+    --tw-gradient-via-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+}
+
+.via-zinc-950\/50,
+.via-stone-950\/50 {
+    --tw-gradient-via: rgba(18, 7, 23, 0.5) var(--tw-gradient-via-position) !important;
+    --tw-gradient-via-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+}
+
+.to-zinc-950,
+.to-stone-950 {
+    --tw-gradient-to: var(--color-background) var(--tw-gradient-to-position) !important;
+}
+
+.to-zinc-900,
+.to-stone-900 {
+    --tw-gradient-to: var(--color-surface) var(--tw-gradient-to-position) !important;
+}
+
+.to-zinc-900\/80,
+.to-stone-900\/80 {
+    --tw-gradient-to: rgba(26, 11, 36, 0.8) var(--tw-gradient-to-position) !important;
+}
+
+.text-balance {
+    text-wrap: balance;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-primary-dark);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+}
+
+/* Animation classes */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.animation-delay-200 {
+    animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+    animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+    animation-delay: 600ms;
+}

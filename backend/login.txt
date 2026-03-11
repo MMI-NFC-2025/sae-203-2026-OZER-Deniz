@@ -1,0 +1,40 @@
+import PocketBase from 'pocketbase';
+
+const pb = new PocketBase('http://127.0.0.1:8090');
+
+// Artistes
+export async function getArtistes() {
+  return await pb.collection('artistes').getFullList({ sort: 'nom' });
+}
+
+export async function getArtiste(id) {
+  return await pb.collection('artistes').getOne(id);
+}
+
+// Scènes
+export async function getScenes() {
+  return await pb.collection('scenes').getFullList({ sort: 'nom' });
+}
+
+export async function getScene(id) {
+  return await pb.collection('scenes').getOne(id);
+}
+
+// Concerts
+export async function getConcerts() {
+  return await pb.collection('concerts').getFullList({
+    sort: 'date,heure',
+    expand: 'artiste,scene'
+  });
+}
+
+export async function getConcert(id) {
+  return await pb.collection('concerts').getOne(id, { expand: 'artiste,scene' });
+}
+
+// URL image
+export function getImageUrl(record, filename) {
+  return pb.files.getURL(record, filename);
+}
+
+export { pb };

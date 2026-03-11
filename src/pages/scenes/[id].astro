@@ -1,0 +1,361 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import {
+    getScene,
+    getConcerts,
+    getImageUrl,
+} from "../../../backend/backend.mjs";
+
+const { id } = Astro.params;
+
+if (!id) {
+    return Astro.redirect("/scenes");
+}
+
+const scene = await getScene(id);
+
+if (!scene) {
+    return Astro.redirect("/scenes");
+}
+
+const imageUrl = scene.image ? getImageUrl(scene, scene.image) : null;
+
+// Récupérer les concerts de cette scène
+const allConcerts = await getConcerts();
+const sceneConcerts = allConcerts.filter((c) => c.scene === scene.id);
+---
+
+<Layout
+    title={`${scene.nom} - Chorus Symphonia`}
+    description={scene.description ||
+        `Découvrez la scène ${scene.nom} au festival Chorus Symphonia 2026`}
+>
+    <Header />
+
+    <main class="pt-24">
+        <!-- Breadcrumb -->
+        <div class="bg-stone-900 py-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex items-center gap-2 text-sm">
+                    <a
+                        href="/"
+                        class="text-stone-400 hover:text-primary transition-colors"
+                        >Accueil</a
+                    >
+                    <span class="text-stone-600">/</span>
+                    <a
+                        href="/scenes"
+                        class="text-stone-400 hover:text-primary transition-colors"
+                        >Scènes</a
+                    >
+                    <span class="text-stone-600">/</span>
+                    <span class="text-primary">{scene.nom}</span>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Hero Image -->
+        <section class="relative h-[50vh] min-h-[400px]">
+            {
+                imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={scene.nom}
+                        class="absolute inset-0 w-full h-full object-cover"
+                    />
+                ) : (
+                    <div class="absolute inset-0 bg-stone-800 flex items-center justify-center">
+                        <svg
+                            class="w-32 h-32 text-stone-700"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            />
+                        </svg>
+                    </div>
+                )
+            }
+            <div
+                class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/50 to-transparent"
+            >
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-8">
+                <div class="max-w-7xl mx-auto">
+                    <h1
+                        class="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4"
+                    >
+                        {scene.nom}
+                    </h1>
+                    {
+                        scene.capacite && (
+                            <div class="flex items-center gap-2 text-stone-300">
+                                <svg
+                                    class="w-5 h-5 text-primary"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                </svg>
+                                <span class="text-lg">
+                                    {scene.capacite} places
+                                </span>
+                            </div>
+                        )
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- Scene Details -->
+        <section class="py-16 bg-stone-950">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <!-- Description -->
+                    <div class="lg:col-span-2">
+                        {
+                            scene.description && (
+                                <div class="mb-12">
+                                    <h2 class="font-serif text-2xl font-bold text-white mb-6">
+                                        À propos de cette scène
+                                    </h2>
+                                    <p class="text-stone-300 text-lg leading-relaxed whitespace-pre-line">
+                                        {scene.description}
+                                    </p>
+                                </div>
+                            )
+                        }
+
+                        <!-- Concerts sur cette scène -->
+                        {
+                            sceneConcerts.length > 0 && (
+                                <div>
+                                    <h2 class="font-serif text-2xl font-bold text-white mb-6">
+                                        Programmation sur cette scène
+                                    </h2>
+                                    <div class="space-y-4">
+                                        {sceneConcerts.map((concert) => {
+                                            const date = new Date(concert.date);
+                                            const formattedDate =
+                                                date.toLocaleDateString(
+                                                    "fr-FR",
+                                                    {
+                                                        weekday: "long",
+                                                        day: "numeric",
+                                                        month: "long",
+                                                    },
+                                                );
+                                            return (
+                                                <div class="bg-stone-900 rounded-xl p-6 border border-stone-800 hover:border-primary/30 transition-colors">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                        <div>
+                                                            <h3 class="font-serif text-xl font-bold text-white mb-2">
+                                                                {concert.titre}
+                                                            </h3>
+                                                            <p class="text-stone-400 mb-2">
+                                                                {formattedDate}{" "}
+                                                                à{" "}
+                                                                {concert.heure}
+                                                            </p>
+                                                            {concert.expand
+                                                                ?.artiste && (
+                                                                <a
+                                                                    href={`/artistes/${concert.expand.artiste.id}`}
+                                                                    class="text-primary hover:underline"
+                                                                >
+                                                                    {
+                                                                        concert
+                                                                            .expand
+                                                                            .artiste
+                                                                            .nom
+                                                                    }
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                        <a
+                                                            href="/billetterie"
+                                                            class="inline-flex items-center justify-center px-6 py-3 bg-primary text-stone-950 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                                                        >
+                                                            Réserver
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )
+                        }
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div
+                            class="bg-stone-900 rounded-xl p-6 border border-stone-800 sticky top-28"
+                        >
+                            <h3
+                                class="font-serif text-xl font-bold text-white mb-6"
+                            >
+                                Informations
+                            </h3>
+
+                            <div class="space-y-4">
+                                {
+                                    scene.capacite && (
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                                <svg
+                                                    class="w-5 h-5 text-primary"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-stone-400 text-sm">
+                                                    Capacité
+                                                </p>
+                                                <p class="text-white font-medium">
+                                                    {scene.capacite} spectateurs
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+
+                                <div class="flex items-start gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0"
+                                    >
+                                        <svg
+                                            class="w-5 h-5 text-primary"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                            ></path>
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                            ></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-stone-400 text-sm">
+                                            Lieu
+                                        </p>
+                                        <p class="text-white font-medium">
+                                            Citadelle de Besançon
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0"
+                                    >
+                                        <svg
+                                            class="w-5 h-5 text-primary"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                                            ></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-stone-400 text-sm">
+                                            Concerts programmés
+                                        </p>
+                                        <p class="text-white font-medium">
+                                            {sceneConcerts.length} événement{
+                                                sceneConcerts.length > 1
+                                                    ? "s"
+                                                    : ""
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 pt-6 border-t border-stone-800">
+                                <a
+                                    href="/infos-pratiques"
+                                    class="flex items-center justify-center gap-2 w-full px-6 py-3 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition-colors"
+                                >
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        ></path>
+                                    </svg>
+                                    Infos pratiques
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a
+                    href="/scenes"
+                    class="inline-flex items-center gap-2 mt-12 text-stone-400 hover:text-primary transition-colors"
+                >
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Retour aux scènes
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <Footer />
+</Layout>
