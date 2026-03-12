@@ -1,6 +1,6 @@
 import PocketBase from 'pocketbase';
 
-const pocketbaseUrl = 'http://sae203.deniz-ozer.fr/_/'.replace(/\/_\/?$/, '');
+const pocketbaseUrl = 'https://sae203.deniz-ozer.fr';
 const pb = new PocketBase(pocketbaseUrl);
 
 function isMissingCollectionError(error) {

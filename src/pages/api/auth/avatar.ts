@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import PocketBase from 'pocketbase';
 
-const pocketbaseUrl = 'http://sae203.deniz-ozer.fr/_/'.replace(/\/_\/?$/, '');
+const pocketbaseUrl = 'https://sae203.deniz-ozer.fr';
 
 export const POST: APIRoute = async ({ request }) => {
     const pb = new PocketBase(pocketbaseUrl);
