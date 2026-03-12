@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import PocketBase from 'pocketbase';
 
-const pocketbaseUrl = 'http://127.0.0.1:8090';
+const pocketbaseUrl = 'http://sae203.deniz-ozer.fr/_/'.replace(/\/_\/?$/, '');
 
 export const POST: APIRoute = async ({ request }) => {
     const formData = await request.formData();
