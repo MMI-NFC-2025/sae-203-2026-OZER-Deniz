@@ -4,6 +4,7 @@ import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import {
     getScene,
+    getArtistes,
     getConcerts,
     getImageUrl,
 } from "../../../backend/backend.mjs";
@@ -20,7 +21,18 @@ if (!scene) {
     return Astro.redirect("/scenes");
 }
 
-const imageUrl = scene.image ? getImageUrl(scene, scene.image) : null;
+const sceneImage = scene.image_scene || scene.image;
+const imageUrl = sceneImage ? getImageUrl(scene, sceneImage) : null;
+
+function getFirstFile(value) {
+    return Array.isArray(value) ? value[0] : value;
+}
+
+const allArtistes = await getArtistes();
+const sceneArtisteIds = Array.isArray(scene.artistes) ? scene.artistes : [];
+const sceneArtistes = sceneArtisteIds
+    .map((artisteId) => allArtistes.find((artiste) => artiste.id === artisteId))
+    .filter(Boolean);
 
 // Récupérer les concerts de cette scène
 const allConcerts = await getConcerts();
@@ -135,6 +147,202 @@ const sceneConcerts = allConcerts.filter((c) => c.scene === scene.id);
                                     <p class="text-stone-300 text-lg leading-relaxed whitespace-pre-line">
                                         {scene.description}
                                     </p>
+                                </div>
+                            )
+                        }
+
+                        {
+                            (scene.type ||
+                                scene.ambiance ||
+                                scene.assises ||
+                                scene.visibilite ||
+                                scene.acces_pmr) && (
+                                <div class="mb-12">
+                                    <h2 class="font-serif text-2xl font-bold text-white mb-6">
+                                        Caractéristiques de la scène
+                                    </h2>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {scene.type && (
+                                            <div class="rounded-xl border border-stone-800 bg-stone-900/60 p-4">
+                                                <p class="text-stone-400 text-sm mb-1">
+                                                    Type
+                                                </p>
+                                                <p class="text-white font-medium">
+                                                    {scene.type}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {scene.ambiance && (
+                                            <div class="rounded-xl border border-stone-800 bg-stone-900/60 p-4">
+                                                <p class="text-stone-400 text-sm mb-1">
+                                                    Ambiance
+                                                </p>
+                                                <p class="text-white font-medium">
+                                                    {scene.ambiance}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {scene.assises && (
+                                            <div class="rounded-xl border border-stone-800 bg-stone-900/60 p-4">
+                                                <p class="text-stone-400 text-sm mb-1">
+                                                    Assises
+                                                </p>
+                                                <p class="text-white font-medium">
+                                                    {scene.assises}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {scene.visibilite && (
+                                            <div class="rounded-xl border border-stone-800 bg-stone-900/60 p-4">
+                                                <p class="text-stone-400 text-sm mb-1">
+                                                    Visibilité
+                                                </p>
+                                                <p class="text-white font-medium">
+                                                    {scene.visibilite}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {scene.acces_pmr && (
+                                            <div class="rounded-xl border border-stone-800 bg-stone-900/60 p-4 sm:col-span-2">
+                                                <p class="text-stone-400 text-sm mb-1">
+                                                    Accès PMR
+                                                </p>
+                                                <p class="text-white font-medium">
+                                                    {scene.acces_pmr}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {
+                            sceneArtistes.length > 0 && (
+                                <div class="mb-12">
+                                    <div class="flex items-center justify-between mb-6">
+                                        <h2 class="font-serif text-2xl font-bold text-white">
+                                            Artistes liés à cette scène
+                                        </h2>
+                                        {sceneArtistes.length > 1 && (
+                                            <div class="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    data-artists-prev
+                                                    class="w-10 h-10 rounded-full border border-stone-700 text-stone-300 hover:text-white hover:border-primary transition-colors"
+                                                    aria-label="Artiste précédent"
+                                                >
+                                                    <svg
+                                                        class="w-5 h-5 mx-auto"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M15 19l-7-7 7-7"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-artists-next
+                                                    class="w-10 h-10 rounded-full border border-stone-700 text-stone-300 hover:text-white hover:border-primary transition-colors"
+                                                    aria-label="Artiste suivant"
+                                                >
+                                                    <svg
+                                                        class="w-5 h-5 mx-auto"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 5l7 7-7 7"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div
+                                        class="overflow-hidden"
+                                        data-artists-carousel
+                                    >
+                                        <div
+                                            class="flex gap-4 transition-transform duration-500 ease-out"
+                                            data-artists-track
+                                        >
+                                            {sceneArtistes.map((artiste) => {
+                                                const artisteImage =
+                                                    getFirstFile(
+                                                        artiste.image_artiste,
+                                                    ) ||
+                                                    getFirstFile(artiste.photo);
+                                                const artisteImageUrl =
+                                                    artisteImage
+                                                        ? getImageUrl(
+                                                              artiste,
+                                                              artisteImage,
+                                                          )
+                                                        : null;
+
+                                                return (
+                                                    <a
+                                                        href={`/artistes/${artiste.id}`}
+                                                        class="min-w-[260px] max-w-[260px] bg-stone-900 rounded-xl overflow-hidden border border-stone-800 hover:border-primary/40 hover:-translate-y-1 transition-all"
+                                                    >
+                                                        <div class="h-44 bg-stone-800">
+                                                            {artisteImageUrl ? (
+                                                                <img
+                                                                    src={
+                                                                        artisteImageUrl
+                                                                    }
+                                                                    alt={
+                                                                        artiste.nom
+                                                                    }
+                                                                    class="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div class="w-full h-full flex items-center justify-center">
+                                                                    <svg
+                                                                        class="w-14 h-14 text-stone-600"
+                                                                        fill="none"
+                                                                        viewBox="0 0 24 24"
+                                                                        stroke="currentColor"
+                                                                    >
+                                                                        <path
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            stroke-width="1.5"
+                                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                                        />
+                                                                    </svg>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div class="p-4">
+                                                            <h3 class="font-serif text-xl font-bold text-white mb-1">
+                                                                {artiste.nom}
+                                                            </h3>
+                                                            {artiste.instrument && (
+                                                                <p class="text-primary text-sm">
+                                                                    {
+                                                                        artiste.instrument
+                                                                    }
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </a>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
                             )
                         }
@@ -359,3 +567,62 @@ const sceneConcerts = allConcerts.filter((c) => c.scene === scene.id);
 
     <Footer />
 </Layout>
+
+<script>
+    const carousel = document.querySelector<HTMLElement>(
+        "[data-artists-carousel]",
+    );
+    const track = document.querySelector<HTMLElement>("[data-artists-track]");
+    const prevButton = document.querySelector<HTMLButtonElement>(
+        "[data-artists-prev]",
+    );
+    const nextButton = document.querySelector<HTMLButtonElement>(
+        "[data-artists-next]",
+    );
+
+    if (carousel && track) {
+        const cards = Array.from(track.children);
+        const prev = prevButton;
+        const next = nextButton;
+        let index = 0;
+
+        const getStep = () => {
+            if (!cards.length) return 0;
+            const cardWidth = cards[0].getBoundingClientRect().width;
+            return cardWidth + 16;
+        };
+
+        const getVisibleCount = () => {
+            const step = getStep();
+            if (!step) return 1;
+            return Math.max(1, Math.floor(carousel.clientWidth / step));
+        };
+
+        const getMaxIndex = () => Math.max(0, cards.length - getVisibleCount());
+
+        const render = () => {
+            const maxIndex = getMaxIndex();
+            if (index > maxIndex) index = maxIndex;
+            if (index < 0) index = 0;
+
+            const offset = index * getStep();
+            track.style.transform = `translateX(-${offset}px)`;
+
+            if (prev) prev.disabled = index === 0;
+            if (next) next.disabled = index >= maxIndex;
+        };
+
+        prev?.addEventListener("click", () => {
+            index -= 1;
+            render();
+        });
+
+        next?.addEventListener("click", () => {
+            index += 1;
+            render();
+        });
+
+        window.addEventListener("resize", render);
+        render();
+    }
+</script>

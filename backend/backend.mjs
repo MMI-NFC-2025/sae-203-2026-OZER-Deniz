@@ -1,6 +1,6 @@
 import PocketBase from 'pocketbase';
 
-const pb = new PocketBase(process.env.POCKETBASE_URL || 'http://127.0.0.1:8090');
+const pb = new PocketBase('http://127.0.0.1:8090');
 
 function isMissingCollectionError(error) {
     return error?.status === 404 && error?.response?.message === 'Missing collection context.';

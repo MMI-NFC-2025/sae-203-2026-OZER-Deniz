@@ -42,8 +42,10 @@ const scenes = await getScenes();
                     scenes.length > 0 ? (
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {scenes.map((scene) => {
-                                const imageUrl = scene.image
-                                    ? getImageUrl(scene, scene.image)
+                                const sceneImage =
+                                    scene.image_scene || scene.image;
+                                const imageUrl = sceneImage
+                                    ? getImageUrl(scene, sceneImage)
                                     : null;
                                 return (
                                     <a

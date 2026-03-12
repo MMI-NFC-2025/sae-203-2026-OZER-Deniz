@@ -1,0 +1,211 @@
+---
+import PocketBase from "pocketbase";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const pb = new PocketBase("http://127.0.0.1:8090");
+pb.authStore.loadFromCookie(Astro.request.headers.get("cookie") || "");
+
+if (!pb.authStore.isValid || !pb.authStore.model) {
+    return Astro.redirect("/connexion?error=not-authenticated");
+}
+
+try {
+    await pb.collection("users").authRefresh();
+} catch {
+    return Astro.redirect("/connexion?error=session-expired");
+}
+
+const user = pb.authStore.model as {
+    id?: string;
+    name?: string;
+    username?: string;
+    email?: string;
+    created?: string;
+    avatar?: string;
+};
+
+const displayName = user.name || user.username || "Utilisateur";
+const createdAt = user.created
+    ? new Date(user.created).toLocaleDateString("fr-FR")
+    : null;
+const welcome = Astro.url.searchParams.get("welcome");
+const avatarStatus = Astro.url.searchParams.get("avatar");
+const profilePhotoUrl =
+    user.avatar && user.avatar.length > 0
+        ? pb.files.getURL(user, user.avatar, { thumb: "300x300" })
+        : null;
+---
+
+<Layout title="Mon compte - Chorus Symphonia">
+    <Header />
+
+    <main class="pt-24 min-h-screen bg-zinc-950">
+        <section class="py-16 md:py-24">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div
+                    class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-8 md:p-10"
+                >
+                    <h1
+                        class="font-serif text-3xl sm:text-4xl text-zinc-100 font-bold mb-4"
+                    >
+                        Mon compte
+                    </h1>
+                    <p class="text-zinc-400 mb-8">
+                        Voici les informations de ton compte PocketBase.
+                    </p>
+
+                    {
+                        welcome && (
+                            <div class="mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-300 text-sm">
+                                Compte créé avec succès. Bienvenue.
+                            </div>
+                        )
+                    }
+
+                    {
+                        avatarStatus === "updated" && (
+                            <div class="mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-300 text-sm">
+                                Photo de profil mise à jour.
+                            </div>
+                        )
+                    }
+
+                    {
+                        avatarStatus === "missing-file" && (
+                            <div class="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300 text-sm">
+                                Choisis une image avant d'envoyer.
+                            </div>
+                        )
+                    }
+
+                    {
+                        avatarStatus === "error" && (
+                            <div class="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300 text-sm">
+                                Impossible de mettre à jour la photo pour le
+                                moment.
+                            </div>
+                        )
+                    }
+
+                    <div
+                        class="mb-8 rounded-xl border border-zinc-800 bg-zinc-950/60 p-6"
+                    >
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center gap-5"
+                        >
+                            <div
+                                class="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 border border-zinc-700 shrink-0"
+                            >
+                                {
+                                    profilePhotoUrl ? (
+                                        <img
+                                            src={profilePhotoUrl}
+                                            alt="Photo de profil"
+                                            class="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div class="w-full h-full flex items-center justify-center text-zinc-500">
+                                            <svg
+                                                class="w-10 h-10"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    )
+                                }
+                            </div>
+
+                            <form
+                                method="post"
+                                action="/api/auth/avatar"
+                                enctype="multipart/form-data"
+                                class="flex-1 grid sm:grid-cols-[1fr_auto] gap-3"
+                            >
+                                <input
+                                    name="avatar"
+                                    type="file"
+                                    accept="image/*"
+                                    class="w-full rounded-lg border border-zinc-700 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-200 file:mr-3 file:border-0 file:bg-purple-600 file:text-white file:px-3 file:py-2 file:rounded-md hover:file:bg-purple-500"
+                                />
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-[#7a6290] hover:bg-[#8c70a4] text-white font-semibold transition-colors"
+                                >
+                                    Changer la photo
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <div
+                            class="rounded-lg border border-zinc-800 bg-zinc-950/70 px-4 py-3"
+                        >
+                            <p
+                                class="text-zinc-500 text-xs uppercase tracking-wider mb-1"
+                            >
+                                Nom
+                            </p>
+                            <p class="text-zinc-100 text-lg font-medium">
+                                {displayName}
+                            </p>
+                        </div>
+                        <div
+                            class="rounded-lg border border-zinc-800 bg-zinc-950/70 px-4 py-3"
+                        >
+                            <p
+                                class="text-zinc-500 text-xs uppercase tracking-wider mb-1"
+                            >
+                                Email
+                            </p>
+                            <p class="text-zinc-100 text-lg font-medium">
+                                {user.email || "Non défini"}
+                            </p>
+                        </div>
+                        <div
+                            class="rounded-lg border border-zinc-800 bg-zinc-950/70 px-4 py-3"
+                        >
+                            <p
+                                class="text-zinc-500 text-xs uppercase tracking-wider mb-1"
+                            >
+                                Compte créé le
+                            </p>
+                            <p class="text-zinc-100 text-lg font-medium">
+                                {createdAt || "Non défini"}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <a
+                            href="/programmation"
+                            class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors"
+                        >
+                            Voir la programmation
+                        </a>
+                        <form method="post" action="/api/auth/logout">
+                            <button
+                                type="submit"
+                                class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold transition-colors"
+                            >
+                                Se déconnecter
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <Footer />
+</Layout>

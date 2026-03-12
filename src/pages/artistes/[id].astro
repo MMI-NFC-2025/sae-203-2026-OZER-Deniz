@@ -4,6 +4,7 @@ import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import {
     getArtiste,
+    getScenes,
     getConcerts,
     getImageUrl,
 } from "../../../backend/backend.mjs";
@@ -20,7 +21,28 @@ if (!artiste) {
     return Astro.redirect("/artistes");
 }
 
-const imageUrl = artiste.photo ? getImageUrl(artiste, artiste.photo) : null;
+function getFirstFile(value) {
+    return Array.isArray(value) ? value[0] : value;
+}
+
+const artisteImage =
+    getFirstFile(artiste.image_artiste) || getFirstFile(artiste.photo);
+const imageUrl = artisteImage ? getImageUrl(artiste, artisteImage) : null;
+const galleryImages = Array.isArray(artiste.gallery_image)
+    ? artiste.gallery_image
+    : artiste.gallery_image
+      ? [artiste.gallery_image]
+      : [];
+const galleryImageUrls = galleryImages.map((filename) =>
+    getImageUrl(artiste, filename),
+);
+const galleryId = `artist-gallery-${artiste.id}`;
+
+const allScenes = await getScenes();
+const programmeSceneIds = Array.isArray(artiste.programme) ? artiste.programme : [];
+const programmeScenes = programmeSceneIds
+    .map((sceneId) => allScenes.find((sceneItem) => sceneItem.id === sceneId))
+    .filter(Boolean);
 
 // Récupérer les concerts de cet artiste
 const allConcerts = await getConcerts();
@@ -29,7 +51,8 @@ const artisteConcerts = allConcerts.filter((c) => c.artiste === artiste.id);
 
 <Layout
     title={`${artiste.nom} - Chorus Symphonia`}
-    description={artiste.bio ||
+    description={artiste.chapo ||
+        artiste.bio ||
         `Découvrez ${artiste.nom} au festival Chorus Symphonia 2026`}
 >
     <Header />
@@ -63,7 +86,7 @@ const artisteConcerts = allConcerts.filter((c) => c.artiste === artiste.id);
                     <!-- Image -->
                     <div class="relative">
                         <div
-                            class="aspect-[3/4] rounded-2xl overflow-hidden bg-stone-900"
+                            class="aspect-3/4 rounded-2xl overflow-hidden bg-stone-900"
                         >
                             {
                                 imageUrl ? (
@@ -114,11 +137,197 @@ const artisteConcerts = allConcerts.filter((c) => c.artiste === artiste.id);
                         }
 
                         {
+                            artiste.chapo && (
+                                <p class="text-stone-200 text-xl leading-relaxed font-medium mb-8 max-w-2xl">
+                                    {artiste.chapo}
+                                </p>
+                            )
+                        }
+
+                        {
                             artiste.bio && (
                                 <div class="prose prose-invert prose-stone max-w-none">
                                     <p class="text-stone-300 text-lg leading-relaxed whitespace-pre-line">
                                         {artiste.bio}
                                     </p>
+                                </div>
+                            )
+                        }
+
+                        {
+                            galleryImageUrls.length > 0 && (
+                                <div class="mt-10">
+                                    <h2 class="font-serif text-2xl font-bold text-white mb-4">
+                                        Galerie
+                                    </h2>
+                                    <div
+                                        id={galleryId}
+                                        data-gallery
+                                        class="relative rounded-2xl overflow-hidden border border-stone-800 bg-stone-900"
+                                    >
+                                        {galleryImageUrls.map(
+                                            (galleryUrl, index) => (
+                                                <div
+                                                    data-gallery-slide
+                                                    class={
+                                                        index === 0
+                                                            ? "block"
+                                                            : "hidden"
+                                                    }
+                                                >
+                                                    <img
+                                                        src={galleryUrl}
+                                                        alt={`Galerie ${index + 1} de ${artiste.nom}`}
+                                                        class="w-full h-64 md:h-80 object-cover"
+                                                    />
+                                                </div>
+                                            ),
+                                        )}
+
+                                        {galleryImageUrls.length > 1 && (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    data-gallery-prev
+                                                    class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-stone-950/75 hover:bg-primary text-white flex items-center justify-center transition-colors"
+                                                    aria-label="Image précédente"
+                                                >
+                                                    <svg
+                                                        class="w-5 h-5"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M15 19l-7-7 7-7"
+                                                        />
+                                                    </svg>
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    data-gallery-next
+                                                    class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-stone-950/75 hover:bg-primary text-white flex items-center justify-center transition-colors"
+                                                    aria-label="Image suivante"
+                                                >
+                                                    <svg
+                                                        class="w-5 h-5"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 5l7 7-7 7"
+                                                        />
+                                                    </svg>
+                                                </button>
+
+                                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                                                    {galleryImageUrls.map(
+                                                        (_, index) => (
+                                                            <button
+                                                                type="button"
+                                                                data-gallery-dot
+                                                                data-gallery-index={
+                                                                    index
+                                                                }
+                                                                class={
+                                                                    index === 0
+                                                                        ? "w-2.5 h-2.5 rounded-full bg-white"
+                                                                        : "w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white/70 transition-colors"
+                                                                }
+                                                                aria-label={`Aller à l'image ${index + 1}`}
+                                                            ></button>
+                                                        ),
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {
+                            programmeScenes.length > 0 && (
+                                <div class="mt-10">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h2 class="font-serif text-2xl font-bold text-white">
+                                            Scènes liées
+                                        </h2>
+                                        {programmeScenes.length > 1 && (
+                                            <div class="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    data-programme-prev
+                                                    class="w-10 h-10 rounded-full border border-stone-700 text-stone-300 hover:text-white hover:border-primary transition-colors"
+                                                    aria-label="Scène précédente"
+                                                >
+                                                    <svg class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-programme-next
+                                                    class="w-10 h-10 rounded-full border border-stone-700 text-stone-300 hover:text-white hover:border-primary transition-colors"
+                                                    aria-label="Scène suivante"
+                                                >
+                                                    <svg class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div class="overflow-hidden" data-programme-carousel>
+                                        <div class="flex gap-4 transition-transform duration-500 ease-out" data-programme-track>
+                                            {programmeScenes.map((relatedScene) => {
+                                                const relatedSceneImage =
+                                                    getFirstFile(relatedScene.image_scene) ||
+                                                    getFirstFile(relatedScene.image);
+                                                const relatedSceneImageUrl = relatedSceneImage
+                                                    ? getImageUrl(relatedScene, relatedSceneImage)
+                                                    : null;
+
+                                                return (
+                                                    <a
+                                                        href={`/scenes/${relatedScene.id}`}
+                                                        class="min-w-[260px] max-w-[260px] bg-stone-900 rounded-xl overflow-hidden border border-stone-800 hover:border-primary/40 hover:-translate-y-1 transition-all"
+                                                    >
+                                                        <div class="h-44 bg-stone-800">
+                                                            {relatedSceneImageUrl ? (
+                                                                <img
+                                                                    src={relatedSceneImageUrl}
+                                                                    alt={relatedScene.nom}
+                                                                    class="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div class="w-full h-full flex items-center justify-center">
+                                                                    <svg class="w-14 h-14 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                                    </svg>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div class="p-4">
+                                                            <h3 class="font-serif text-xl font-bold text-white mb-1">{relatedScene.nom}</h3>
+                                                            {relatedScene.type && (
+                                                                <p class="text-primary text-sm">{relatedScene.type}</p>
+                                                            )}
+                                                        </div>
+                                                    </a>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
                             )
                         }
@@ -207,3 +416,104 @@ const artisteConcerts = allConcerts.filter((c) => c.artiste === artiste.id);
 
     <Footer />
 </Layout>
+
+<script>
+    document.querySelectorAll("[data-gallery]").forEach((gallery) => {
+        const slides = Array.from(
+            gallery.querySelectorAll("[data-gallery-slide]"),
+        );
+        const dots = Array.from(gallery.querySelectorAll("[data-gallery-dot]"));
+        const prevButton = gallery.querySelector("[data-gallery-prev]");
+        const nextButton = gallery.querySelector("[data-gallery-next]");
+
+        if (slides.length <= 1) {
+            return;
+        }
+
+        let currentIndex = 0;
+
+        const render = () => {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle("hidden", index !== currentIndex);
+                slide.classList.toggle("block", index === currentIndex);
+            });
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle("bg-white", index === currentIndex);
+                dot.classList.toggle("bg-white/40", index !== currentIndex);
+            });
+        };
+
+        prevButton?.addEventListener("click", () => {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            render();
+        });
+
+        nextButton?.addEventListener("click", () => {
+            currentIndex = (currentIndex + 1) % slides.length;
+            render();
+        });
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener("click", () => {
+                currentIndex = index;
+                render();
+            });
+        });
+    });
+</script>
+
+<script>
+    const programmeCarousel = document.querySelector('[data-programme-carousel]');
+    const programmeTrack = document.querySelector('[data-programme-track]');
+    const programmePrev = document.querySelector('[data-programme-prev]');
+    const programmeNext = document.querySelector('[data-programme-next]');
+
+    if (programmeCarousel instanceof HTMLElement && programmeTrack instanceof HTMLElement) {
+        const cards = Array.from(programmeTrack.children);
+        let index = 0;
+
+        const getStep = () => {
+            if (!cards.length) return 0;
+            const cardWidth = cards[0].getBoundingClientRect().width;
+            return cardWidth + 16;
+        };
+
+        const getVisibleCount = () => {
+            const step = getStep();
+            if (!step) return 1;
+            return Math.max(1, Math.floor(programmeCarousel.clientWidth / step));
+        };
+
+        const getMaxIndex = () => Math.max(0, cards.length - getVisibleCount());
+
+        const render = () => {
+            const maxIndex = getMaxIndex();
+            if (index > maxIndex) index = maxIndex;
+            if (index < 0) index = 0;
+
+            const offset = index * getStep();
+            programmeTrack.style.transform = `translateX(-${offset}px)`;
+
+            if (programmePrev instanceof HTMLButtonElement) {
+                programmePrev.disabled = index === 0;
+            }
+            if (programmeNext instanceof HTMLButtonElement) {
+                programmeNext.disabled = index >= maxIndex;
+            }
+        };
+
+        programmePrev?.addEventListener('click', () => {
+            index -= 1;
+            render();
+        });
+
+        programmeNext?.addEventListener('click', () => {
+            index += 1;
+            render();
+        });
+
+        window.addEventListener('resize', render);
+        render();
+    }
+</script>

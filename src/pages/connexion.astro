@@ -1,0 +1,144 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const error = Astro.url.searchParams.get("error");
+const logout = Astro.url.searchParams.get("logout");
+const isAuthenticated = Boolean(Astro.cookies.get("pb_auth")?.value);
+---
+
+<Layout title="Connexion - Chorus Symphonia">
+    <Header />
+
+    <main class="pt-24 min-h-screen bg-zinc-950">
+        <section class="py-16 md:py-24">
+            <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div
+                    class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-8 md:p-10"
+                >
+                    <h1
+                        class="font-serif text-3xl sm:text-4xl text-zinc-100 font-bold mb-4"
+                    >
+                        Connexion
+                    </h1>
+                    <p class="text-zinc-400 mb-8">
+                        Connecte-toi pour gérer tes données du festival.
+                    </p>
+
+                    {
+                        logout && (
+                            <div class="mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-300 text-sm">
+                                Déconnexion réussie.
+                            </div>
+                        )
+                    }
+
+                    {
+                        error && (
+                            <div class="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300 text-sm">
+                                {error === "missing-fields"
+                                    ? "Merci de remplir l'email et le mot de passe."
+                                    : error === "not-authenticated"
+                                      ? "Connecte-toi pour accéder à ton compte."
+                                      : error === "session-expired"
+                                        ? "Ta session a expiré, reconnecte-toi."
+                                        : "Email ou mot de passe incorrect."}
+                            </div>
+                        )
+                    }
+
+                    {
+                        isAuthenticated ? (
+                            <div class="space-y-5">
+                                <div class="rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-3 text-purple-200 text-sm">
+                                    Tu es déjà connecté.
+                                </div>
+
+                                <div class="flex flex-wrap gap-3">
+                                    <a
+                                        href="/compte"
+                                        class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-zinc-950 font-semibold transition-colors"
+                                    >
+                                        Aller à mon compte
+                                    </a>
+                                    <form
+                                        method="post"
+                                        action="/api/auth/logout"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold transition-colors"
+                                        >
+                                            Se déconnecter
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        ) : (
+                            <form
+                                method="post"
+                                action="/api/auth/login"
+                                class="space-y-5"
+                            >
+                                <div>
+                                    <label
+                                        for="email"
+                                        class="block text-sm font-medium text-zinc-300 mb-2"
+                                    >
+                                        Email
+                                    </label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        autocomplete="email"
+                                        class="w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-4 py-3 text-zinc-100 outline-none focus:border-purple-500"
+                                        placeholder="ton-email@exemple.com"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label
+                                        for="password"
+                                        class="block text-sm font-medium text-zinc-300 mb-2"
+                                    >
+                                        Mot de passe
+                                    </label>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        required
+                                        autocomplete="current-password"
+                                        class="w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-4 py-3 text-zinc-100 outline-none focus:border-purple-500"
+                                        placeholder="Ton mot de passe"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    class="w-full inline-flex items-center justify-center px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-zinc-950 font-semibold transition-colors"
+                                >
+                                    Se connecter
+                                </button>
+                            </form>
+                        )
+                    }
+
+                    <p class="mt-8 text-sm text-zinc-400">
+                        Pas encore de compte ?
+                        <a
+                            href="/inscription"
+                            class="text-purple-400 hover:text-purple-300"
+                            >S'inscrire</a
+                        >
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <Footer />
+</Layout>
